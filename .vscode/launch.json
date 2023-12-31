@@ -16,7 +16,7 @@
                 "--actual_resume" , "models/ldm/text2img-large/model.ckpt",
                 "-t",
                 "-n","run_niu",
-                "--gpus","0",
+                "--gpus","0,",
                 "--data_root","images/cat_statue",
                 "--init_word","cat",
             ]
