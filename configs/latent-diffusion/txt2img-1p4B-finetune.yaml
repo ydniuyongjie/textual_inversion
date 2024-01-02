@@ -17,7 +17,7 @@ model:
     scale_factor: 0.18215
     use_ema: False
     embedding_reg_weight: 0.0
-
+    
     personalization_config:
       target: ldm.modules.embedding_manager.EmbeddingManager
       params:
@@ -79,7 +79,6 @@ model:
       params:
         n_embed: 1280
         n_layer: 32
-
 
 data:
   target: main.DataModuleFromConfig
