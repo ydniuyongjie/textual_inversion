@@ -19,6 +19,7 @@
                 "--gpus","0,",
                 "--data_root","images/cat_statue",
                 "--init_word","cat",
+                "--no-test",
             ]
         },
 
