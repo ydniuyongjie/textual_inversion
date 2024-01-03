@@ -20,7 +20,7 @@ from pytorch_lightning.utilities import rank_zero_info
 
 from ldm.data.base import Txt2ImgIterableBaseDataset
 from ldm.util import instantiate_from_config
-import os
+
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
 def load_model_from_config(config, ckpt, verbose=False):
@@ -181,7 +181,7 @@ def nondefault_trainer_args(opt):
 
 
 class WrappedDataset(Dataset):
-    """Wraps an arbitrary object with __len__ and __getitem__ into a pytorch dataset"""
+    """用 __len__ 和 __getitem__ 将任意对象包装成 pytorch 数据集"""
 
     def __init__(self, dataset):
         self.data = dataset
@@ -524,7 +524,7 @@ if __name__ == "__main__":
     #               key: value
 
     now = datetime.datetime.now().strftime("%Y-%m-%dT%H-%M-%S")
-
+    
     # add cwd for convenience and to make classes in this file available when
     # running as `python main.py`
     # (in particular `main.DataModuleFromConfig`)
@@ -787,18 +787,20 @@ if __name__ == "__main__":
                 trainer.save_checkpoint(ckpt_path)
 
 
-        def divein(*args, **kwargs):
-            if trainer.global_rank == 0:
-                import pudb;
-                pudb.set_trace()
+        # def divein(*args, **kwargs):
+        #     if trainer.global_rank == 0:
+        #         import pudb;
+        #         pudb.set_trace()
 
 
         import signal
 
         signal.signal(signal.SIGUSR1, melk)
-        signal.signal(signal.SIGUSR2, divein)
+        # signal.signal(signal.SIGUSR2, divein)
 
-        # run
+        # -------------------------------------------------------------#
+        # -----------------------------RUN-----------------------------#
+        # -------------------------------------------------------------#
         if opt.train:
             try:
                 trainer.fit(model, data)
