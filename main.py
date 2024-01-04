@@ -28,7 +28,9 @@ def load_model_from_config(config, ckpt, verbose=False):
     pl_sd = torch.load(ckpt, map_location="cpu")
     sd = pl_sd["state_dict"]
     config.model.params.ckpt_path = ckpt
+    #根据这个配置来创建一个模型对象
     model = instantiate_from_config(config.model)
+    #这一行代码将加载模型参数的结果赋值给了两个变量 m 和 u。其中，m代表了加载成功的参数的数量，u代表了加载失败的参数的数量
     m, u = model.load_state_dict(sd, strict=False)
     if len(m) > 0 and verbose:
         print("missing keys:")
@@ -638,7 +640,7 @@ if __name__ == "__main__":
                 }
             },
         }
-        default_logger_cfg = default_logger_cfgs["testtube"]
+        default_logger_cfg = default_logger_cfgs["wandb"]
         if "logger" in lightning_config:
             logger_cfg = lightning_config.logger
         else:
@@ -671,7 +673,8 @@ if __name__ == "__main__":
         if version.parse(pl.__version__) < version.parse('1.4.0'):
             trainer_kwargs["checkpoint_callback"] = instantiate_from_config(modelckpt_cfg)
 
-        # add callback which sets up log directory
+        # Add Callback which sets up log directory
+        #添加一个回调函数来设置日志目录。
         default_callbacks_cfg = {
             "setup_callback": {
                 "target": "main.SetupCallback",

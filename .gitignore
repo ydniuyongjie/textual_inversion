@@ -3,4 +3,6 @@
 *.ckpt
 *.pyc
 *.pth
-src/taming-transformers
+/src
+/logs
+
