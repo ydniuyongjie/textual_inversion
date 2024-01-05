@@ -1,10 +1,9 @@
 /latent_diffusion.egg-info
 /__pycache__
-*.ckpt
-*.pyc
-*.pth
+**/*.ckpt
+**/*.pyc
+**/*.pth
 /src
 /logs
 /outputs
 /images/bmy
-*.pyc

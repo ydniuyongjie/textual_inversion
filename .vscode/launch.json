@@ -17,8 +17,8 @@
                 "--train","true",
                 "--name","Niu",
                 "--gpus","0,",
-                "--data_root","images/bmy",
-                "--init_word","sculpture",
+                "--data_root","images/cat_statue",
+                "--init_word","cat",
                 "--no-test",
             ]
         },
@@ -35,9 +35,9 @@
                 "--n_iter","2",
                 "--scale","10.0",
                 "--ddim_steps","50",
-                "--embedding_path","logs/bmy2024-01-04T17-43-28_Niu/checkpoints/embeddings_gs-6099.pt",
+                "--embedding_path","logs/cat_statue2024-01-05T21-41-01_Niu/checkpoints/embeddings_gs-7999.pt",
                 "--ckpt_path","models/ldm/text2img-large/model.ckpt",
-                "--prompt","a photo of *",
+                "--prompt","A * is walking on the beach.",
             ]
         },
 
