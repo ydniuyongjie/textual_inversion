@@ -429,7 +429,6 @@ class DDPM(pl.LightningModule):
         opt = torch.optim.AdamW(params, lr=lr)
         return opt
 
-
 class LatentDiffusion(DDPM):
     """main class"""
     def __init__(self,

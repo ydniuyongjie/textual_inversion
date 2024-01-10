@@ -116,3 +116,4 @@ lightning:
   trainer:
     benchmark: True
     max_steps: 8000
+    accelerator: dp

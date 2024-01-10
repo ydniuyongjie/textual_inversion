@@ -26,7 +26,7 @@ os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
 def load_model_from_config(config, ckpt, verbose=False):
     print(f"Loading model from {ckpt}")
-    pl_sd = torch.load(ckpt, map_location="cpu")
+    pl_sd = torch.load(ckpt, map_location="cpu")  # 加载model
     sd = pl_sd["state_dict"]
     config.model.params.ckpt_path = ckpt
     # 根据这个配置来创建一个模型对象
@@ -573,6 +573,7 @@ class ModeSwapCallback(Callback):
 
 if __name__ == "__main__":
     print("version of python_lightning:", pl.__version__)
+    # region comment
     # custom parser to specify config files, train, test and debug mode,
     # postfix, resume.
     # `--key value` arguments are interpreted as arguments to the trainer.
@@ -613,15 +614,14 @@ if __name__ == "__main__":
     #           target: importpath
     #           params:
     #               key: value
-
+    # endregion comment
     now = datetime.datetime.now().strftime("%Y-%m-%dT%H-%M-%S")
-
     # add cwd for convenience and to make classes in this file available when
     # running as `python main.py`
     # (in particular `main.DataModuleFromConfig`)
     sys.path.append(os.getcwd())
 
-    parser = get_parser()
+    parser = get_parser()  # 通过命令行添加一些参数，比如seed=23
     parser = Trainer.add_argparse_args(parser)
 
     opt, unknown = parser.parse_known_args()
@@ -631,7 +631,7 @@ if __name__ == "__main__":
             "If you want to resume training in a new log folder, "
             "use -n/--name in combination with --resume_from_checkpoint"
         )
-    if opt.resume:
+    if opt.resume:  # 断点训练
         if not os.path.exists(opt.resume):
             raise ValueError("Cannot find {}".format(opt.resume))
         if os.path.isfile(opt.resume):
@@ -679,7 +679,7 @@ if __name__ == "__main__":
         # merge trainer cli with config
         trainer_config = lightning_config.get("trainer", OmegaConf.create())
         # default to ddp
-        trainer_config["accelerator"] = "ddp"
+        # trainer_config["accelerator"] = "dp"#在单机的多个GPU上训练
         for k in nondefault_trainer_args(opt):
             trainer_config[k] = getattr(opt, k)
         if not "gpus" in trainer_config:
@@ -690,9 +690,14 @@ if __name__ == "__main__":
             print(f"Running on GPUs {gpuinfo}")
             cpu = False
         trainer_opt = argparse.Namespace(**trainer_config)
+        # -------------------------------------------------------------#
+        # -----------------------------TRAINER-------------------------#
+        # -------------------------------------------------------------#
         lightning_config.trainer = trainer_config
 
-        # model
+        # -------------------------------------------------------------#
+        # -----------------------------MODEL---------------------------#
+        # -------------------------------------------------------------#
 
         # config.model.params.personalization_config.params.init_word = opt.init_word
         config.model.params.personalization_config.params.embedding_manager_ckpt = (
@@ -735,7 +740,9 @@ if __name__ == "__main__":
                 },
             },
         }
-        default_logger_cfg = default_logger_cfgs["wandb"]
+        # 系统将使用的日志
+        default_logger_cfg = default_logger_cfgs["testtube"]
+
         if "logger" in lightning_config:
             logger_cfg = lightning_config.logger
         else:
@@ -754,6 +761,7 @@ if __name__ == "__main__":
                 "save_last": True,
             },
         }
+
         if hasattr(model, "monitor"):
             print(f"Monitoring {model.monitor} as checkpoint metric.")
             default_modelckpt_cfg["params"]["monitor"] = model.monitor
@@ -798,6 +806,7 @@ if __name__ == "__main__":
             },
             "cuda_callback": {"target": "main.CUDACallback"},
         }
+
         if version.parse(pl.__version__) >= version.parse("1.4.0"):
             default_callbacks_cfg.update({"checkpoint_callback": modelckpt_cfg})
 
@@ -834,25 +843,30 @@ if __name__ == "__main__":
             ] = trainer_opt.resume_from_checkpoint
         elif "ignore_keys_callback" in callbacks_cfg:
             del callbacks_cfg["ignore_keys_callback"]
-
+        
+        #将回调函数挂载到Trainer上。
         trainer_kwargs["callbacks"] = [
             instantiate_from_config(callbacks_cfg[k]) for k in callbacks_cfg
         ]
+
         trainer_kwargs["max_steps"] = trainer_opt.max_steps
 
         trainer = Trainer.from_argparse_args(trainer_opt, **trainer_kwargs)
         trainer.logdir = logdir  ###
 
-        # data
-        config.data.params.train.params.data_root = opt.data_root
+        # -------------------------------------------------------------#
+        # -----------------------------DATA----------------------------#
+        # -------------------------------------------------------------#
+        config.data.params.train.params.data_root = opt.data_root  #指定训练数据的目录
         config.data.params.validation.params.data_root = opt.data_root
         data = instantiate_from_config(config.data)
+
         # NOTE according to https://pytorch-lightning.readthedocs.io/en/latest/datamodules.html
         # calling these ourselves should not be necessary but it is.
         # lightning still takes care of proper multiprocessing though
         data.prepare_data()
         data.setup()
-        print("#### Data #####")
+        print("#### Data is Ready！ #####")
         for k in data.datasets:
             print(
                 f"{k}, {data.datasets[k].__class__.__name__}, {len(data.datasets[k])}"
@@ -861,7 +875,7 @@ if __name__ == "__main__":
         # configure learning rate
         bs, base_lr = config.data.params.batch_size, config.model.base_learning_rate
         if not cpu:
-            ngpu = len(lightning_config.trainer.gpus.strip(",").split(","))
+            ngpu = len(lightning_config.trainer.gpus.strip(",").split(","))#GPU的个数
         else:
             ngpu = 1
         if "accumulate_grad_batches" in lightning_config.trainer:
