@@ -223,7 +223,6 @@ def worker_init_fn(_):
     else:
         return np.random.seed(np.random.get_state()[1][0] + worker_id)
 
-
 class DataModuleFromConfig(pl.LightningDataModule):
     def __init__(
         self,
@@ -340,7 +339,6 @@ class DataModuleFromConfig(pl.LightningDataModule):
             num_workers=self.num_workers,
             worker_init_fn=init_fn,
         )
-
 
 class SetupCallback(Callback):
     def __init__(self, resume, now, logdir, ckptdir, cfgdir, config, lightning_config):
@@ -741,7 +739,7 @@ if __name__ == "__main__":
             },
         }
         # 系统将使用的日志
-        default_logger_cfg = default_logger_cfgs["testtube"]
+        default_logger_cfg = default_logger_cfgs["wandb"]
 
         if "logger" in lightning_config:
             logger_cfg = lightning_config.logger
